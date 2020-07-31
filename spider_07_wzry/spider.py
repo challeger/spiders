@@ -26,7 +26,7 @@ class Module_Spider(threading.Thread):
         # 图片队列
         self.image_queue = image_queue
         super().__init__(*args, **kwargs)
-    
+
     @staticmethod
     def get_datas(page_url):
         resp = requests.get(page_url, headers=HEADERS)
@@ -40,7 +40,8 @@ class Module_Spider(threading.Thread):
     def get_img_url(data):
         image_urls = []
         for i in range(1, 9):
-            image_url = parse.unquote(data[f'sProdImgNo_{i}']).replace('/200', '/0')
+            image_url = parse.unquote(
+                data[f'sProdImgNo_{i}']).replace('/200', '/0')
             image_urls.append(image_url)
         return image_urls
 
@@ -51,7 +52,8 @@ class Module_Spider(threading.Thread):
                 # 获取该壁纸所有尺寸的图片链接
                 image_urls = self.get_img_url(data)
                 # 获取该壁纸的名字,并进行一些处理
-                name = re.sub('[\/:*?"<>|]', ' ', parse.unquote(data['sProdName'])).strip()
+                name = re.sub('[\/:*?"<>|]', ' ',
+                              parse.unquote(data['sProdName'])).strip()
                 # 设置保存路径
                 dir_path = os.path.join('E:\Picture\wzry', name)
 
@@ -80,7 +82,7 @@ class Module_Save(threading.Thread):
         except requests.ConnectionError:
             print(f'{image_dir}保存失败...')
             return
-    
+
     def run(self):
         while True:
             try:
@@ -94,7 +96,6 @@ class Module_Save(threading.Thread):
                 # 判断文件夹是否存在,不存在则创建
                 if not os.path.exists(dir_path):
                     os.makedirs(dir_path)
-                
                 self.save_img(image_url, image_dir)
             except (TimeoutError, queue.Empty):
                 break
@@ -113,7 +114,7 @@ def main():
     for _ in range(3):
         foo = Module_Spider(page_queue, image_queue, name=f'爬虫{_}号')
         foo.start()
-    
+
     for _ in range(3):
         foo = Module_Save(image_queue, name=f'保存者{_}号')
         foo.start()
