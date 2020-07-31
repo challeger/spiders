@@ -1,11 +1,13 @@
 #!/user/bin/env python
 # 每天都要有好心情
+import datetime
 import logging
+import queue
+import threading
+
+import redis
 import requests
 import urllib3
-import threading
-import queue
-
 from urllib3.exceptions import InsecureRequestWarning
 
 
@@ -50,6 +52,10 @@ class Module_Parse(threading.Thread):
         super(Module_Parse, self).__init__(*args, **kwargs)
 
     def parse(self, barrage):
+        """
+        解析json文件,把数据格式化并添加到弹幕队列中
+        :param barrage:弹幕数据 字典格式
+        """
         try:
             self.barrage_queue.put({
                 'text': barrage['text'],  # 弹幕内容
@@ -85,17 +91,29 @@ class Module_Parse(threading.Thread):
 
 
 class Module_Save(threading.Thread):
-    def __init__(self, queue_barrage: queue.Queue, *args, **kwargs):
+    def __init__(self, queue_barrage: queue.Queue, pool=redis.ConnectionPool, *args, **kwargs):
         # 弹幕队列
         self.barrage_queue = queue_barrage
+        # 数据库连接
+        self.client = redis.Redis(connection_pool=pool)
         super(Module_Save, self).__init__(*args, **kwargs)
+
+    def save(self, barrage):
+        try:
+            # 键 房间名[当日时间]
+            key = f"{ROOM_ID}[{datetime.datetime.now().strftime('%Y-%m-%d')}]"
+            self.client.sadd(key, barrage)
+        except Exception as e:
+            logging.error(self.name, e)
 
     def run(self) -> None:
         while True:
             try:
                 # 从队列中获取弹幕
                 barrage = self.barrage_queue.get()
-                print(f'[{barrage["timeline"]}] {barrage["nickname"]}:{barrage["text"]}')
+                data = f'[{barrage["timeline"]}] {barrage["nickname"]}({barrage["uid"]}):{barrage["text"]}'
+                # 保存弹幕
+                self.save(data)
             except queue.Empty:
                 print('未捕捉到弹幕..')
 
@@ -111,14 +129,18 @@ if __name__ == '__main__':
     last_barrage = None
     # 锁
     th_lock = threading.Lock()
+    # redis连接池
+    redis_pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
+    # 房间号
+    ROOM_ID = '5440'
 
     for i in range(2):
-        foo = Module_Spider('7734200', data_queue, name=f'弹幕捕捉{i}号')
+        foo = Module_Spider(ROOM_ID, data_queue, name=f'弹幕捕捉{i}号')
         foo.start()
 
     for i in range(2):
         foo = Module_Parse(data_queue, barrage_queue, th_lock, name=f'弹幕解析{i}号')
         foo.start()
 
-    save_thread = Module_Save(barrage_queue, name='弹幕保存1号')
+    save_thread = Module_Save(barrage_queue, redis_pool, name='弹幕保存1号')
     save_thread.start()
