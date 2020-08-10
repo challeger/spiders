@@ -89,21 +89,3 @@ ITEM_PIPELINES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
-
-# 确保request存储到redis中
-SCHEDULER = 'scrapy_redis.scheduler.Scheduler'
-# 确保所有爬虫通过redis去重
-DUPEFILTER_CLASS = 'scrapy_redis.dupefilter.RFPDupeFilter'
-# 设置redis为item pipeline
-ITEM_PIPELINES = {
-  'scrapy_redis.pipelines.RedisPipeline': 300
-}
-# 在redis中保持scrapy-redis用到的队列,不会清理redis中的队列
-SCHEDULER_PERSIST = True
-# 设置连接redis信息
-REDIS_HOST = '***'
-REDIS_PORT = 6379
-REDIS_ENCODING = 'utf-8'
-REDIS_PARAMS = {
-  'password': '***',
-}

@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from scrapy.http import Request, HtmlResponse
-from scrapy_redis.spiders import RedisSpider
 
 from ..items import LianjiaItem
 
 
-class SpiderLianjiaSpider(RedisSpider):
+class SpiderLianjiaSpider(scrapy.Spider):
     name = 'spider_lianjia'
     allowed_domains = ['lianjia.com']
-    # start_urls = ['https://www.lianjia.com/city/']
-    redis_key = 'key_lianjia'
+    start_urls = ['https://www.lianjia.com/city/']
 
     def parse(self, response: HtmlResponse):
         """
