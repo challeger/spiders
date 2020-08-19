@@ -101,7 +101,8 @@ class Module_Save(threading.Thread):
     def save(self, barrage):
         try:
             # 键 房间名[当日时间]
-            key = f"{ROOM_ID}[{datetime.datetime.now().strftime('%Y-%m-%d')}]"
+            # key = f"{ROOM_ID}[{datetime.datetime.now().strftime('%Y-%m-%d')}]"
+            key = 'RNG vs TES 第二场'
             self.client.sadd(key, barrage)
         except Exception as e:
             logging.error(self.name, e)
@@ -132,7 +133,7 @@ if __name__ == '__main__':
     # redis连接池
     redis_pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
     # 房间号
-    ROOM_ID = '5440'
+    ROOM_ID = '7734200'
 
     for i in range(2):
         foo = Module_Spider(ROOM_ID, data_queue, name=f'弹幕捕捉{i}号')
