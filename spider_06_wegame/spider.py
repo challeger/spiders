@@ -34,6 +34,8 @@ class Spider_WeGame:
         self.session = requests.Session()
         # 设置请求头
         self.session.headers = HEADERS
+        # 这个与config中的qqinfo_ext->sig要一致
+        self.session.cookies['skey'] = '@mMA8FM2jb'
 
     def login(self):
         # 登录请求url
@@ -44,6 +46,7 @@ class Spider_WeGame:
         if self.session.cookies.get('tgp_ticket', None):
             self.session.headers.pop('Referer')  # 登录时需要用到,登录成功后就不需要了
             print('登录成功')
+            print(self.session.cookies)
             return True
         else:
             return False

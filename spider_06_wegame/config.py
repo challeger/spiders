@@ -4,9 +4,15 @@
 # 用于登录提交的json数据
 LOGIN_DATA = {
     "login_info": {
-        "qq_info_type": 3,
+        "qq_info_type": 6,
         "uin": "3436049981",
-        "sig": "@WUZUNHG6p"  # 每天都会换
+        # 这个字段应该是起到检验的作用,每次都会变,不过用登录时拿到的就可以了
+        "sig": "MaxEvC4puzr4lE65J8HrH5JNQNFNvIpfsh9SZDXtxew_",
+        'qqinfo_ext': [{
+            'qq_info_type': 3,
+            # 这个与cookie中的skey一致
+            'sig': '',
+        }]
     },
     "config_params": {
         "lang_type": 0
